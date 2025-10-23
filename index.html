@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quiz Pokémon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            max-height: 100vh;
+            max-height: 100dvh;
+            overflow-y: auto;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 40px;
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        @media (min-width: 768px) {
+            h1 {
+                margin-bottom: 30px;
+                font-size: 2em;
+            }
+        }
+
+        .question-counter {
+            text-align: center;
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .question-counter {
+                font-size: 1.2em;
+                margin-bottom: 20px;
+            }
+        }
+
+        .pokemon-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            min-height: 120px;
+        }
+
+        @media (min-width: 768px) {
+            .pokemon-container {
+                margin: 30px 0;
+                min-height: 200px;
+            }
+        }
+
+        .pokemon-img {
+            max-width: 280px;
+            width: 100%;
+            height: auto;
+            image-rendering: pixelated;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @media (min-width: 768px) {
+            .pokemon-img {
+                max-width: 400px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .feedback.show {
+            animation: bounceIn 0.5s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pokemon-img.slide-out {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
+        .pokemon-img.slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .input-container {
+            position: relative;
+            margin: 15px 0;
+        }
+
+        @media (min-width: 768px) {
+            .input-container {
+                margin: 30px 0;
+            }
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        @media (min-width: 768px) {
+            input {
+                padding: 15px;
+                font-size: 1.1em;
+            }
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .suggestions.active {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item.selected {
+            background-color: #667eea;
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 1em;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        @media (min-width: 768px) {
+            button {
+                padding: 15px;
+                font-size: 1.1em;
+                margin-top: 20px;
+            }
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .feedback {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            min-height: 25px;
+        }
+
+        @media (min-width: 768px) {
+            .feedback {
+                margin-top: 20px;
+                font-size: 1.2em;
+                min-height: 30px;
+            }
+        }
+
+        .feedback.correct {
+            color: #28a745;
+        }
+
+        .feedback.incorrect {
+            color: #dc3545;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        @media (min-width: 768px) {
+            .score {
+                font-size: 1.5em;
+                margin-top: 20px;
+            }
+        }
+
+        .final-screen {
+            text-align: center;
+        }
+
+        .final-screen h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        @media (min-width: 768px) {
+            .final-screen h2 {
+                margin-bottom: 20px;
+                font-size: 2em;
+            }
+        }
+
+        .final-score {
+            font-size: 2em;
+            color: #667eea;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        @media (min-width: 768px) {
+            .final-score {
+                font-size: 3em;
+                margin: 30px 0;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .difficulty-screen {
+            text-align: center;
+        }
+
+        .difficulty-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        @media (min-width: 768px) {
+            .difficulty-screen h2 {
+                margin-bottom: 30px;
+                font-size: 1.8em;
+            }
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .difficulty-btn {
+            padding: 15px;
+            font-size: 1em;
+            border-radius: 15px;
+            transition: all 0.3s;
+        }
+
+        @media (min-width: 768px) {
+            .difficulty-btn {
+                padding: 20px;
+                font-size: 1.2em;
+            }
+        }
+
+        .difficulty-btn.easy {
+            background: #28a745;
+        }
+
+        .difficulty-btn.easy:hover {
+            background: #218838;
+        }
+
+        .difficulty-btn.medium {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .difficulty-btn.medium:hover {
+            background: #e0a800;
+        }
+
+        .difficulty-btn.hard {
+            background: #dc3545;
+        }
+
+        .difficulty-btn.hard:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Quiz Pokémon ⚡</h1>
+        
+        <div id="difficulty-screen" class="difficulty-screen">
+            <h2>Choisissez votre difficulté</h2>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn easy" data-difficulty="easy">Facile - Pokémon connus (1-50)</button>
+                <button class="difficulty-btn medium" data-difficulty="medium">Moyen - 1ère & 2ème gen (1-100)</button>
+                <button class="difficulty-btn hard" data-difficulty="hard">Difficile - Les 151 premiers</button>
+            </div>
+        </div>
+        
+        <div id="quiz-screen" class="hidden">
+            <div class="question-counter">
+                Question <span id="current-question">1</span> / 10
+            </div>
+            
+            <div class="pokemon-container">
+                <img class="pokemon-img" id="pokemon-display" src="" alt="Pokémon">
+            </div>
+            
+            <div class="input-container">
+                <input 
+                    type="text" 
+                    id="pokemon-input" 
+                    placeholder="Quel est ce Pokémon ?"
+                    autocomplete="off"
+                >
+                <div class="suggestions" id="suggestions"></div>
+            </div>
+            
+            <button id="submit-btn">Valider</button>
+            
+            <div class="feedback" id="feedback"></div>
+            <div class="score">Score : <span id="current-score">0</span> / 10</div>
+        </div>
+        
+        <div id="final-screen" class="final-screen hidden">
+            <h2>Quiz terminé !</h2>
+            <div class="final-score" id="final-score">0 / 10</div>
+            <button id="restart-btn">Recommencer</button>
+        </div>
+    </div>
+
+    <script>
+        const allPokemon = [
+            { name: "Bulbizarre", id: 1, difficulty: "easy" },
+            { name: "Herbizarre", id: 2, difficulty: "easy" },
+            { name: "Florizarre", id: 3, difficulty: "easy" },
+            { name: "Salamèche", id: 4, difficulty: "easy" },
+            { name: "Reptincel", id: 5, difficulty: "easy" },
+            { name: "Dracaufeu", id: 6, difficulty: "easy" },
+            { name: "Carapuce", id: 7, difficulty: "easy" },
+            { name: "Carabaffe", id: 8, difficulty: "easy" },
+            { name: "Tortank", id: 9, difficulty: "easy" },
+            { name: "Chenipan", id: 10, difficulty: "easy" },
+            { name: "Chrysacier", id: 11, difficulty: "easy" },
+            { name: "Papilusion", id: 12, difficulty: "easy" },
+            { name: "Aspicot", id: 13, difficulty: "easy" },
+            { name: "Coconfort", id: 14, difficulty: "easy" },
+            { name: "Dardargnan", id: 15, difficulty: "easy" },
+            { name: "Roucool", id: 16, difficulty: "easy" },
+            { name: "Roucoups", id: 17, difficulty: "easy" },
+            { name: "Roucarnage", id: 18, difficulty: "easy" },
+            { name: "Rattata", id: 19, difficulty: "easy" },
+            { name: "Rattatac", id: 20, difficulty: "easy" },
+            { name: "Piafabec", id: 21, difficulty: "easy" },
+            { name: "Rapasdepic", id: 22, difficulty: "easy" },
+            { name: "Abo", id: 23, difficulty: "easy" },
+            { name: "Arbok", id: 24, difficulty: "easy" },
+            { name: "Pikachu", id: 25, difficulty: "easy" },
+            { name: "Raichu", id: 26, difficulty: "easy" },
+            { name: "Sabelette", id: 27, difficulty: "easy" },
+            { name: "Sablaireau", id: 28, difficulty: "easy" },
+            { name: "Nidoran♀", id: 29, difficulty: "easy" },
+            { name: "Nidorina", id: 30, difficulty: "easy" },
+            { name: "Nidoqueen", id: 31, difficulty: "easy" },
+            { name: "Nidoran♂", id: 32, difficulty: "easy" },
+            { name: "Nidorino", id: 33, difficulty: "easy" },
+            { name: "Nidoking", id: 34, difficulty: "easy" },
+            { name: "Mélofée", id: 35, difficulty: "easy" },
+            { name: "Mélodelfe", id: 36, difficulty: "easy" },
+            { name: "Goupix", id: 37, difficulty: "easy" },
+            { name: "Feunard", id: 38, difficulty: "easy" },
+            { name: "Rondoudou", id: 39, difficulty: "easy" },
+            { name: "Grodoudou", id: 40, difficulty: "easy" },
+            { name: "Nosferapti", id: 41, difficulty: "easy" },
+            { name: "Nosferalto", id: 42, difficulty: "easy" },
+            { name: "Mystherbe", id: 43, difficulty: "easy" },
+            { name: "Ortide", id: 44, difficulty: "easy" },
+            { name: "Rafflesia", id: 45, difficulty: "easy" },
+            { name: "Paras", id: 46, difficulty: "easy" },
+            { name: "Parasect", id: 47, difficulty: "easy" },
+            { name: "Mimitoss", id: 48, difficulty: "easy" },
+            { name: "Aéromite", id: 49, difficulty: "easy" },
+            { name: "Taupiqueur", id: 50, difficulty: "easy" },
+            { name: "Triopikeur", id: 51, difficulty: "medium" },
+            { name: "Miaouss", id: 52, difficulty: "medium" },
+            { name: "Persian", id: 53, difficulty: "medium" },
+            { name: "Psykokwak", id: 54, difficulty: "medium" },
+            { name: "Akwakwak", id: 55, difficulty: "medium" },
+            { name: "Férosinge", id: 56, difficulty: "medium" },
+            { name: "Colossinge", id: 57, difficulty: "medium" },
+            { name: "Caninos", id: 58, difficulty: "medium" },
+            { name: "Arcanin", id: 59, difficulty: "medium" },
+            { name: "Ptitard", id: 60, difficulty: "medium" },
+            { name: "Têtarte", id: 61, difficulty: "medium" },
+            { name: "Tartard", id: 62, difficulty: "medium" },
+            { name: "Abra", id: 63, difficulty: "medium" },
+            { name: "Kadabra", id: 64, difficulty: "medium" },
+            { name: "Alakazam", id: 65, difficulty: "medium" },
+            { name: "Machoc", id: 66, difficulty: "medium" },
+            { name: "Machopeur", id: 67, difficulty: "medium" },
+            { name: "Mackogneur", id: 68, difficulty: "medium" },
+            { name: "Chétiflor", id: 69, difficulty: "medium" },
+            { name: "Boustiflor", id: 70, difficulty: "medium" },
+            { name: "Empiflor", id: 71, difficulty: "medium" },
+            { name: "Tentacool", id: 72, difficulty: "medium" },
+            { name: "Tentacruel", id: 73, difficulty: "medium" },
+            { name: "Racaillou", id: 74, difficulty: "medium" },
+            { name: "Gravalanch", id: 75, difficulty: "medium" },
+            { name: "Grolem", id: 76, difficulty: "medium" },
+            { name: "Ponyta", id: 77, difficulty: "medium" },
+            { name: "Galopa", id: 78, difficulty: "medium" },
+            { name: "Ramoloss", id: 79, difficulty: "medium" },
+            { name: "Flagadoss", id: 80, difficulty: "medium" },
+            { name: "Magnéti", id: 81, difficulty: "medium" },
+            { name: "Magnéton", id: 82, difficulty: "medium" },
+            { name: "Canarticho", id: 83, difficulty: "medium" },
+            { name: "Doduo", id: 84, difficulty: "medium" },
+            { name: "Dodrio", id: 85, difficulty: "medium" },
+            { name: "Otaria", id: 86, difficulty: "medium" },
+            { name: "Lamantine", id: 87, difficulty: "medium" },
+            { name: "Tadmorv", id: 88, difficulty: "medium" },
+            { name: "Grotadmorv", id: 89, difficulty: "medium" },
+            { name: "Kokiyas", id: 90, difficulty: "medium" },
+            { name: "Crustabri", id: 91, difficulty: "medium" },
+            { name: "Fantominus", id: 92, difficulty: "medium" },
+            { name: "Spectrum", id: 93, difficulty: "medium" },
+            { name: "Ectoplasma", id: 94, difficulty: "medium" },
+            { name: "Onix", id: 95, difficulty: "medium" },
+            { name: "Soporifik", id: 96, difficulty: "medium" },
+            { name: "Hypnomade", id: 97, difficulty: "medium" },
+            { name: "Krabby", id: 98, difficulty: "medium" },
+            { name: "Krabboss", id: 99, difficulty: "medium" },
+            { name: "Voltorbe", id: 100, difficulty: "medium" },
+            { name: "Électrode", id: 101, difficulty: "hard" },
+            { name: "Noeunoeuf", id: 102, difficulty: "hard" },
+            { name: "Noadkoko", id: 103, difficulty: "hard" },
+            { name: "Osselait", id: 104, difficulty: "hard" },
+            { name: "Ossatueur", id: 105, difficulty: "hard" },
+            { name: "Kicklee", id: 106, difficulty: "hard" },
+            { name: "Tygnon", id: 107, difficulty: "hard" },
+            { name: "Excelangue", id: 108, difficulty: "hard" },
+            { name: "Smogo", id: 109, difficulty: "hard" },
+            { name: "Smogogo", id: 110, difficulty: "hard" },
+            { name: "Rhinocorne", id: 111, difficulty: "hard" },
+            { name: "Rhinoféros", id: 112, difficulty: "hard" },
+            { name: "Leveinard", id: 113, difficulty: "hard" },
+            { name: "Saquedeneu", id: 114, difficulty: "hard" },
+            { name: "Kangourex", id: 115, difficulty: "hard" },
+            { name: "Hypotrempe", id: 116, difficulty: "hard" },
+            { name: "Hypocéan", id: 117, difficulty: "hard" },
+            { name: "Poissirène", id: 118, difficulty: "hard" },
+            { name: "Poissoroy", id: 119, difficulty: "hard" },
+            { name: "Stari", id: 120, difficulty: "hard" },
+            { name: "Staross", id: 121, difficulty: "hard" },
+            { name: "M.Mime", id: 122, difficulty: "hard" },
+            { name: "Insécateur", id: 123, difficulty: "hard" },
+            { name: "Lippoutou", id: 124, difficulty: "hard" },
+            { name: "Élektek", id: 125, difficulty: "hard" },
+            { name: "Magmar", id: 126, difficulty: "hard" },
+            { name: "Scarabrute", id: 127, difficulty: "hard" },
+            { name: "Tauros", id: 128, difficulty: "hard" },
+            { name: "Magicarpe", id: 129, difficulty: "hard" },
+            { name: "Léviator", id: 130, difficulty: "hard" },
+            { name: "Lokhlass", id: 131, difficulty: "hard" },
+            { name: "Métamorph", id: 132, difficulty: "hard" },
+            { name: "Évoli", id: 133, difficulty: "hard" },
+            { name: "Aquali", id: 134, difficulty: "hard" },
+            { name: "Voltali", id: 135, difficulty: "hard" },
+            { name: "Pyroli", id: 136, difficulty: "hard" },
+            { name: "Porygon", id: 137, difficulty: "hard" },
+            { name: "Amonita", id: 138, difficulty: "hard" },
+            { name: "Amonistar", id: 139, difficulty: "hard" },
+            { name: "Kabuto", id: 140, difficulty: "hard" },
+            { name: "Kabutops", id: 141, difficulty: "hard" },
+            { name: "Ptéra", id: 142, difficulty: "hard" },
+            { name: "Ronflex", id: 143, difficulty: "hard" },
+            { name: "Artikodin", id: 144, difficulty: "hard" },
+            { name: "Électhor", id: 145, difficulty: "hard" },
+            { name: "Sulfura", id: 146, difficulty: "hard" },
+            { name: "Minidraco", id: 147, difficulty: "hard" },
+            { name: "Draco", id: 148, difficulty: "hard" },
+            { name: "Dracolosse", id: 149, difficulty: "hard" },
+            { name: "Mewtwo", id: 150, difficulty: "hard" },
+            { name: "Mew", id: 151, difficulty: "hard" }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedPokemon = [];
+        let currentPokemon = null;
+        let selectedSuggestionIndex = -1;
+        let currentDifficulty = null;
+        let pokemon = [];
+
+        const elements = {
+            pokemonDisplay: document.getElementById('pokemon-display'),
+            input: document.getElementById('pokemon-input'),
+            suggestions: document.getElementById('suggestions'),
+            submitBtn: document.getElementById('submit-btn'),
+            feedback: document.getElementById('feedback'),
+            currentQuestionSpan: document.getElementById('current-question'),
+            currentScoreSpan: document.getElementById('current-score'),
+            difficultyScreen: document.getElementById('difficulty-screen'),
+            quizScreen: document.getElementById('quiz-screen'),
+            finalScreen: document.getElementById('final-screen'),
+            finalScore: document.getElementById('final-score'),
+            restartBtn: document.getElementById('restart-btn')
+        };
+
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const difficulty = btn.dataset.difficulty;
+                startQuiz(difficulty);
+            });
+        });
+
+        function startQuiz(difficulty) {
+            currentDifficulty = difficulty;
+            
+            if (difficulty === 'easy') {
+                pokemon = allPokemon.filter(p => p.difficulty === 'easy');
+            } else if (difficulty === 'medium') {
+                pokemon = allPokemon.filter(p => p.difficulty === 'easy' || p.difficulty === 'medium');
+            } else {
+                pokemon = allPokemon;
+            }
+            
+            elements.difficultyScreen.classList.add('hidden');
+            elements.quizScreen.classList.remove('hidden');
+            initQuiz();
+        }
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function initQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            selectedPokemon = shuffleArray(pokemon).slice(0, 10);
+            elements.currentScoreSpan.textContent = '0';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuestion >= 10) {
+                showFinalScreen();
+                return;
+            }
+
+            currentPokemon = selectedPokemon[currentQuestion];
+            elements.pokemonDisplay.classList.remove('slide-out', 'slide-in');
+            void elements.pokemonDisplay.offsetWidth;
+            elements.pokemonDisplay.classList.add('slide-in');
+            elements.pokemonDisplay.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${currentPokemon.id}.png`;
+            elements.currentQuestionSpan.textContent = currentQuestion + 1;
+            elements.input.value = '';
+            elements.feedback.textContent = '';
+            elements.feedback.className = 'feedback';
+            elements.input.focus();
+            elements.suggestions.classList.remove('active');
+            selectedSuggestionIndex = -1;
+        }
+
+        function normalizeString(str) {
+            return str.toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9\s]/g, "")
+                .trim();
+        }
+
+        function showSuggestions(value) {
+            if (!value) {
+                elements.suggestions.classList.remove('active');
+                return;
+            }
+
+            const normalizedValue = normalizeString(value);
+            const matches = pokemon.filter(p => 
+                normalizeString(p.name).includes(normalizedValue)
+            ).slice(0, 5);
+
+            if (matches.length === 0) {
+                elements.suggestions.classList.remove('active');
+                return;
+            }
+
+            elements.suggestions.innerHTML = matches.map((p, index) => 
+                `<div class="suggestion-item" data-pokemon="${p.name}" data-index="${index}">${p.name}</div>`
+            ).join('');
+            
+            elements.suggestions.classList.add('active');
+            selectedSuggestionIndex = -1;
+        }
+
+        function selectSuggestion(pokemonName) {
+            elements.input.value = pokemonName;
+            elements.suggestions.classList.remove('active');
+            selectedSuggestionIndex = -1;
+        }
+
+        elements.input.addEventListener('input', (e) => {
+            showSuggestions(e.target.value);
+        });
+
+        elements.input.addEventListener('keydown', (e) => {
+            const suggestionItems = elements.suggestions.querySelectorAll('.suggestion-item');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (suggestionItems.length > 0) {
+                    selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, suggestionItems.length - 1);
+                    updateSuggestionSelection(suggestionItems);
+                }
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (suggestionItems.length > 0) {
+                    selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, 0);
+                    updateSuggestionSelection(suggestionItems);
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedSuggestionIndex >= 0 && suggestionItems[selectedSuggestionIndex]) {
+                    selectSuggestion(suggestionItems[selectedSuggestionIndex].dataset.pokemon);
+                } else {
+                    submitAnswer();
+                }
+            } else if (e.key === 'Escape') {
+                elements.suggestions.classList.remove('active');
+                selectedSuggestionIndex = -1;
+            }
+        });
+
+        function updateSuggestionSelection(suggestionItems) {
+            suggestionItems.forEach((item, index) => {
+                if (index === selectedSuggestionIndex) {
+                    item.classList.add('selected');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        elements.suggestions.addEventListener('click', (e) => {
+            if (e.target.classList.contains('suggestion-item')) {
+                selectSuggestion(e.target.dataset.pokemon);
+            }
+        });
+
+        elements.submitBtn.addEventListener('click', submitAnswer);
+
+        function submitAnswer() {
+            const answer = elements.input.value.trim();
+            
+            if (!answer) {
+                return;
+            }
+
+            const isCorrect = normalizeString(answer) === normalizeString(currentPokemon.name);
+            
+            if (isCorrect) {
+                score++;
+                elements.feedback.textContent = '✓ Correct !';
+                elements.feedback.className = 'feedback correct show';
+            } else {
+                elements.feedback.textContent = `✗ Faux ! C'était ${currentPokemon.name}`;
+                elements.feedback.className = 'feedback incorrect show';
+            }
+
+            elements.currentScoreSpan.textContent = score;
+            elements.submitBtn.disabled = true;
+            elements.input.disabled = true;
+
+            elements.pokemonDisplay.classList.add('slide-out');
+
+            setTimeout(() => {
+                currentQuestion++;
+                elements.submitBtn.disabled = false;
+                elements.input.disabled = false;
+                showQuestion();
+            }, 800);
+        }
+
+        function showFinalScreen() {
+            elements.quizScreen.classList.add('hidden');
+            elements.finalScreen.classList.remove('hidden');
+            elements.finalScore.textContent = `${score} / 10`;
+        }
+
+        elements.restartBtn.addEventListener('click', () => {
+            elements.finalScreen.classList.add('hidden');
+            elements.difficultyScreen.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
