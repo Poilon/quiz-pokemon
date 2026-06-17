@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quiz Pokémon</title>
+    <title>Pokémon - Quiz & Test de Personnalité</title>
     <style>
         * {
             margin: 0;
@@ -24,14 +24,15 @@
 
         .container {
             background: white;
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 24px;
+            padding: 24px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 600px;
+            max-width: 640px;
             width: 100%;
             max-height: 100vh;
             max-height: 100dvh;
             overflow-y: auto;
+            position: relative;
         }
 
         @media (min-width: 768px) {
@@ -54,18 +55,99 @@
             }
         }
 
+        .hidden {
+            display: none;
+        }
+
+        /* ---------- Home button ---------- */
+        .home-btn {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: auto;
+            margin: 0;
+            padding: 8px 14px;
+            font-size: 0.85em;
+            background: #f0f0f5;
+            color: #667eea;
+            border-radius: 12px;
+            box-shadow: none;
+        }
+        .home-btn:hover { background: #e4e4f0; }
+
+        /* ---------- Home screen ---------- */
+        .home-screen { text-align: center; }
+
+        .home-subtitle {
+            color: #777;
+            margin-bottom: 28px;
+            font-size: 1em;
+        }
+
+        .mode-cards {
+            display: grid;
+            gap: 18px;
+        }
+        @media (min-width: 600px) {
+            .mode-cards { grid-template-columns: 1fr 1fr; }
+        }
+
+        .mode-card {
+            cursor: pointer;
+            border-radius: 20px;
+            padding: 28px 20px;
+            color: white;
+            text-align: center;
+            transition: transform 0.25s, box-shadow 0.25s;
+            border: none;
+            font-family: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .mode-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 14px 30px rgba(0,0,0,0.25);
+        }
+        .mode-card .emoji { font-size: 2.6em; line-height: 1; }
+        .mode-card .mode-title { font-size: 1.25em; font-weight: 700; }
+        .mode-card .mode-desc { font-size: 0.9em; opacity: 0.92; font-weight: 400; }
+
+        .mode-card.quiz { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: #5a3210; }
+        .mode-card.perso { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); color: #4a2c63; }
+
+        /* ---------- Shared buttons ---------- */
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1em;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.15s;
+            margin-top: 10px;
+            font-family: inherit;
+        }
+        button:hover { background: #5568d3; }
+        button:active { transform: scale(0.98); }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+
+        @media (min-width: 768px) {
+            button { padding: 15px; font-size: 1.1em; }
+        }
+
+        /* ================= QUIZ ================= */
         .question-counter {
             text-align: center;
             font-size: 1em;
             color: #666;
             margin-bottom: 15px;
         }
-
         @media (min-width: 768px) {
-            .question-counter {
-                font-size: 1.2em;
-                margin-bottom: 20px;
-            }
+            .question-counter { font-size: 1.2em; margin-bottom: 20px; }
         }
 
         .pokemon-container {
@@ -75,12 +157,8 @@
             margin: 15px 0;
             min-height: 120px;
         }
-
         @media (min-width: 768px) {
-            .pokemon-container {
-                margin: 30px 0;
-                min-height: 200px;
-            }
+            .pokemon-container { margin: 30px 0; min-height: 200px; }
         }
 
         .pokemon-img {
@@ -90,81 +168,31 @@
             image-rendering: pixelated;
             animation: fadeIn 0.5s ease-in;
         }
-
         @media (min-width: 768px) {
-            .pokemon-img {
-                max-width: 400px;
-            }
+            .pokemon-img { max-width: 400px; }
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
         }
-
-        @keyframes slideOut {
-            to {
-                opacity: 0;
-                transform: translateX(-50px);
-            }
-        }
-
+        @keyframes slideOut { to { opacity: 0; transform: translateX(-50px); } }
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
         }
-
-        .feedback.show {
-            animation: bounceIn 0.5s ease-out;
-        }
-
         @keyframes bounceIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.3);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.05);
-            }
-            70% {
-                transform: scale(0.9);
-            }
-            100% {
-                transform: scale(1);
-            }
+            0% { opacity: 0; transform: scale(0.3); }
+            50% { opacity: 1; transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); }
         }
+        .feedback.show { animation: bounceIn 0.5s ease-out; }
+        .pokemon-img.slide-out { animation: slideOut 0.3s ease-in forwards; }
+        .pokemon-img.slide-in { animation: slideIn 0.3s ease-out; }
 
-        .pokemon-img.slide-out {
-            animation: slideOut 0.3s ease-in forwards;
-        }
-
-        .pokemon-img.slide-in {
-            animation: slideIn 0.3s ease-out;
-        }
-
-        .input-container {
-            position: relative;
-            margin: 15px 0;
-        }
-
-        @media (min-width: 768px) {
-            .input-container {
-                margin: 30px 0;
-            }
-        }
+        .input-container { position: relative; margin: 15px 0; }
+        @media (min-width: 768px) { .input-container { margin: 30px 0; } }
 
         input {
             width: 100%;
@@ -175,17 +203,8 @@
             outline: none;
             transition: border-color 0.3s;
         }
-
-        @media (min-width: 768px) {
-            input {
-                padding: 15px;
-                font-size: 1.1em;
-            }
-        }
-
-        input:focus {
-            border-color: #667eea;
-        }
+        @media (min-width: 768px) { input { padding: 15px; font-size: 1.1em; } }
+        input:focus { border-color: #667eea; }
 
         .suggestions {
             position: absolute;
@@ -201,52 +220,10 @@
             display: none;
             z-index: 1000;
         }
-
-        .suggestions.active {
-            display: block;
-        }
-
-        .suggestion-item {
-            padding: 12px 15px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
+        .suggestions.active { display: block; }
+        .suggestion-item { padding: 12px 15px; cursor: pointer; transition: background-color 0.2s; }
         .suggestion-item:hover,
-        .suggestion-item.selected {
-            background-color: #667eea;
-            color: white;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            font-size: 1em;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-top: 10px;
-        }
-
-        @media (min-width: 768px) {
-            button {
-                padding: 15px;
-                font-size: 1.1em;
-                margin-top: 20px;
-            }
-        }
-
-        button:hover {
-            background: #5568d3;
-        }
-
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
+        .suggestion-item.selected { background-color: #667eea; color: white; }
 
         .feedback {
             text-align: center;
@@ -255,22 +232,9 @@
             font-weight: bold;
             min-height: 25px;
         }
-
-        @media (min-width: 768px) {
-            .feedback {
-                margin-top: 20px;
-                font-size: 1.2em;
-                min-height: 30px;
-            }
-        }
-
-        .feedback.correct {
-            color: #28a745;
-        }
-
-        .feedback.incorrect {
-            color: #dc3545;
-        }
+        @media (min-width: 768px) { .feedback { margin-top: 20px; font-size: 1.2em; min-height: 30px; } }
+        .feedback.correct { color: #28a745; }
+        .feedback.incorrect { color: #dc3545; }
 
         .score {
             text-align: center;
@@ -279,117 +243,216 @@
             color: #667eea;
             font-weight: bold;
         }
+        @media (min-width: 768px) { .score { font-size: 1.5em; margin-top: 20px; } }
 
-        @media (min-width: 768px) {
-            .score {
-                font-size: 1.5em;
-                margin-top: 20px;
-            }
+        .final-screen { text-align: center; }
+        .final-screen h2 { color: #333; margin-bottom: 15px; font-size: 1.5em; }
+        @media (min-width: 768px) { .final-screen h2 { margin-bottom: 20px; font-size: 2em; } }
+        .final-score { font-size: 2em; color: #667eea; margin: 20px 0; font-weight: bold; }
+        @media (min-width: 768px) { .final-score { font-size: 3em; margin: 30px 0; } }
+
+        .difficulty-screen { text-align: center; }
+        .difficulty-screen h2 { color: #333; margin-bottom: 20px; font-size: 1.3em; }
+        @media (min-width: 768px) { .difficulty-screen h2 { margin-bottom: 30px; font-size: 1.8em; } }
+        .difficulty-buttons { display: flex; flex-direction: column; gap: 15px; }
+        .difficulty-btn { padding: 15px; font-size: 1em; border-radius: 15px; transition: all 0.3s; }
+        @media (min-width: 768px) { .difficulty-btn { padding: 20px; font-size: 1.2em; } }
+        .difficulty-btn.easy { background: #28a745; }
+        .difficulty-btn.easy:hover { background: #218838; }
+        .difficulty-btn.medium { background: #ffc107; color: #333; }
+        .difficulty-btn.medium:hover { background: #e0a800; }
+        .difficulty-btn.hard { background: #dc3545; }
+        .difficulty-btn.hard:hover { background: #c82333; }
+
+        /* ================= PERSONALITY TEST ================= */
+        .perso-progress {
+            height: 10px;
+            background: #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 6px;
         }
-
-        .final-screen {
+        .perso-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #a18cd1, #fbc2eb);
+            border-radius: 8px;
+            transition: width 0.4s ease;
+        }
+        .perso-counter {
             text-align: center;
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 18px;
         }
-
-        .final-screen h2 {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 1.5em;
-        }
-
-        @media (min-width: 768px) {
-            .final-screen h2 {
-                margin-bottom: 20px;
-                font-size: 2em;
-            }
-        }
-
-        .final-score {
-            font-size: 2em;
-            color: #667eea;
-            margin: 20px 0;
-            font-weight: bold;
-        }
-
-        @media (min-width: 768px) {
-            .final-score {
-                font-size: 3em;
-                margin: 30px 0;
-            }
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .difficulty-screen {
+        .perso-question {
             text-align: center;
-        }
-
-        .difficulty-screen h2 {
             color: #333;
-            margin-bottom: 20px;
-            font-size: 1.3em;
+            font-size: 1.25em;
+            font-weight: 700;
+            margin-bottom: 22px;
+            min-height: 2.4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.4s ease;
+        }
+        @media (min-width: 768px) { .perso-question { font-size: 1.45em; } }
+
+        /* text options */
+        .perso-options { display: flex; flex-direction: column; gap: 12px; animation: fadeIn 0.4s ease; }
+        .perso-option {
+            text-align: left;
+            background: #f5f5fb;
+            color: #333;
+            border: 2px solid transparent;
+            border-radius: 14px;
+            padding: 16px 18px;
+            font-size: 1em;
+            font-weight: 500;
+            margin-top: 0;
+            transition: all 0.2s;
+        }
+        .perso-option:hover {
+            background: #ece9fb;
+            border-color: #a18cd1;
+            transform: translateX(4px);
+        }
+        .perso-option.selected {
+            background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+            color: #3a2350;
+            border-color: #8a6fc4;
         }
 
-        @media (min-width: 768px) {
-            .difficulty-screen h2 {
-                margin-bottom: 30px;
-                font-size: 1.8em;
-            }
+        /* image options */
+        .perso-image-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            animation: fadeIn 0.4s ease;
         }
-
-        .difficulty-buttons {
+        .perso-image-option {
+            cursor: pointer;
+            background: #f5f5fb;
+            border: 3px solid transparent;
+            border-radius: 18px;
+            padding: 10px;
+            transition: all 0.2s;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            align-items: center;
+        }
+        .perso-image-option:hover {
+            background: #ece9fb;
+            border-color: #a18cd1;
+            transform: translateY(-4px);
+        }
+        .perso-image-option.selected {
+            border-color: #8a6fc4;
+            background: linear-gradient(135deg, #efe7fb, #fde7f4);
+            box-shadow: 0 6px 18px rgba(138,111,196,0.4);
+        }
+        .perso-image-option img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            pointer-events: none;
         }
 
-        .difficulty-btn {
-            padding: 15px;
-            font-size: 1em;
-            border-radius: 15px;
-            transition: all 0.3s;
+        /* result */
+        .perso-result { text-align: center; animation: fadeIn 0.6s ease; }
+        .perso-result .reveal-label {
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.8em;
+            margin-bottom: 4px;
         }
-
-        @media (min-width: 768px) {
-            .difficulty-btn {
-                padding: 20px;
-                font-size: 1.2em;
-            }
-        }
-
-        .difficulty-btn.easy {
-            background: #28a745;
-        }
-
-        .difficulty-btn.easy:hover {
-            background: #218838;
-        }
-
-        .difficulty-btn.medium {
-            background: #ffc107;
+        .perso-result .totem-name {
+            font-size: 2em;
+            font-weight: 800;
             color: #333;
+            margin-bottom: 4px;
         }
-
-        .difficulty-btn.medium:hover {
-            background: #e0a800;
+        @media (min-width: 768px) { .perso-result .totem-name { font-size: 2.6em; } }
+        .perso-result .totem-title {
+            font-size: 1.1em;
+            color: #8a6fc4;
+            font-weight: 600;
+            margin-bottom: 14px;
         }
-
-        .difficulty-btn.hard {
-            background: #dc3545;
+        .totem-img-wrap {
+            display: flex;
+            justify-content: center;
+            margin: 6px 0 18px;
         }
-
-        .difficulty-btn.hard:hover {
-            background: #c82333;
+        .totem-img-wrap img {
+            width: 230px;
+            max-width: 70%;
+            height: auto;
+            filter: drop-shadow(0 10px 20px rgba(138,111,196,0.45));
+            animation: totemPop 0.7s ease;
         }
+        @keyframes totemPop {
+            0% { opacity: 0; transform: scale(0.5) rotate(-8deg); }
+            60% { opacity: 1; transform: scale(1.08) rotate(3deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+        .totem-desc {
+            color: #555;
+            font-size: 1.02em;
+            line-height: 1.6;
+            background: #f7f6fc;
+            border-radius: 16px;
+            padding: 18px 20px;
+            text-align: left;
+            margin-bottom: 16px;
+        }
+        .totem-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .totem-trait {
+            background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+            color: #3a2350;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .result-actions { display: flex; flex-direction: column; gap: 10px; }
+        .btn-secondary { background: #f0f0f5; color: #667eea; }
+        .btn-secondary:hover { background: #e4e4f0; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>⚡ Quiz Pokémon ⚡</h1>
-        
-        <div id="difficulty-screen" class="difficulty-screen">
+        <button id="home-btn" class="home-btn hidden">← Accueil</button>
+
+        <!-- ============ HOME ============ -->
+        <div id="home-screen" class="home-screen">
+            <h1>⚡ Pokémon ⚡</h1>
+            <p class="home-subtitle">Choisis ton aventure</p>
+            <div class="mode-cards">
+                <button class="mode-card quiz" id="go-quiz">
+                    <span class="emoji">🎮</span>
+                    <span class="mode-title">Quiz</span>
+                    <span class="mode-desc">Reconnais les 151 Pokémon</span>
+                </button>
+                <button class="mode-card perso" id="go-perso">
+                    <span class="emoji">🔮</span>
+                    <span class="mode-title">Test de personnalité</span>
+                    <span class="mode-desc">Découvre ton Pokémon totem</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ============ QUIZ : difficulté ============ -->
+        <div id="difficulty-screen" class="difficulty-screen hidden">
+            <h1>⚡ Quiz Pokémon ⚡</h1>
             <h2>Choisissez votre difficulté</h2>
             <div class="difficulty-buttons">
                 <button class="difficulty-btn easy" data-difficulty="easy">Facile - Pokémon connus (1-50)</button>
@@ -397,40 +460,59 @@
                 <button class="difficulty-btn hard" data-difficulty="hard">Difficile - Les 151 premiers</button>
             </div>
         </div>
-        
+
+        <!-- ============ QUIZ : jeu ============ -->
         <div id="quiz-screen" class="hidden">
             <div class="question-counter">
                 Question <span id="current-question">1</span> / 10
             </div>
-            
             <div class="pokemon-container">
                 <img class="pokemon-img" id="pokemon-display" src="" alt="Pokémon">
             </div>
-            
             <div class="input-container">
-                <input 
-                    type="text" 
-                    id="pokemon-input" 
-                    placeholder="Quel est ce Pokémon ?"
-                    autocomplete="off"
-                >
+                <input type="text" id="pokemon-input" placeholder="Quel est ce Pokémon ?" autocomplete="off">
                 <div class="suggestions" id="suggestions"></div>
             </div>
-            
             <button id="submit-btn">Valider</button>
-            
             <div class="feedback" id="feedback"></div>
             <div class="score">Score : <span id="current-score">0</span> / 10</div>
         </div>
-        
+
+        <!-- ============ QUIZ : fin ============ -->
         <div id="final-screen" class="final-screen hidden">
             <h2>Quiz terminé !</h2>
             <div class="final-score" id="final-score">0 / 10</div>
             <button id="restart-btn">Recommencer</button>
         </div>
+
+        <!-- ============ PERSO : test ============ -->
+        <div id="perso-screen" class="hidden">
+            <h1>🔮 Quel est ton Pokémon totem ?</h1>
+            <div class="perso-progress"><div class="perso-progress-bar" id="perso-bar"></div></div>
+            <div class="perso-counter">Question <span id="perso-current">1</span> / 10</div>
+            <div class="perso-question" id="perso-question"></div>
+            <div id="perso-answers"></div>
+        </div>
+
+        <!-- ============ PERSO : résultat ============ -->
+        <div id="perso-result-screen" class="perso-result hidden">
+            <div class="reveal-label">Ton Pokémon totem est</div>
+            <div class="totem-name" id="totem-name"></div>
+            <div class="totem-title" id="totem-title"></div>
+            <div class="totem-img-wrap"><img id="totem-img" src="" alt="Pokémon totem"></div>
+            <div class="totem-traits" id="totem-traits"></div>
+            <div class="totem-desc" id="totem-desc"></div>
+            <div class="result-actions">
+                <button id="perso-restart">Refaire le test</button>
+                <button id="perso-try-quiz" class="btn-secondary">Tenter le Quiz à la place</button>
+            </div>
+        </div>
     </div>
 
     <script>
+        /* ================================================================
+           DONNÉES POKÉMON (Quiz)
+        ================================================================ */
         const allPokemon = [
             { name: "Bulbizarre", id: 1, difficulty: "easy" },
             { name: "Herbizarre", id: 2, difficulty: "easy" },
@@ -585,6 +667,37 @@
             { name: "Mew", id: 151, difficulty: "hard" }
         ];
 
+        const officialArt = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+        const pixelSprite = id => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+
+        /* ================================================================
+           NAVIGATION ENTRE ÉCRANS
+        ================================================================ */
+        const screens = {
+            home: document.getElementById('home-screen'),
+            difficulty: document.getElementById('difficulty-screen'),
+            quiz: document.getElementById('quiz-screen'),
+            final: document.getElementById('final-screen'),
+            perso: document.getElementById('perso-screen'),
+            persoResult: document.getElementById('perso-result-screen')
+        };
+        const homeBtn = document.getElementById('home-btn');
+
+        function showScreen(name) {
+            Object.values(screens).forEach(s => s.classList.add('hidden'));
+            screens[name].classList.add('hidden');
+            screens[name].classList.remove('hidden');
+            homeBtn.classList.toggle('hidden', name === 'home');
+            screens.home.parentElement.scrollTop = 0;
+        }
+
+        document.getElementById('go-quiz').addEventListener('click', () => showScreen('difficulty'));
+        document.getElementById('go-perso').addEventListener('click', startPersoTest);
+        homeBtn.addEventListener('click', () => showScreen('home'));
+
+        /* ================================================================
+           QUIZ (logique existante)
+        ================================================================ */
         let currentQuestion = 0;
         let score = 0;
         let selectedPokemon = [];
@@ -601,23 +714,16 @@
             feedback: document.getElementById('feedback'),
             currentQuestionSpan: document.getElementById('current-question'),
             currentScoreSpan: document.getElementById('current-score'),
-            difficultyScreen: document.getElementById('difficulty-screen'),
-            quizScreen: document.getElementById('quiz-screen'),
-            finalScreen: document.getElementById('final-screen'),
             finalScore: document.getElementById('final-score'),
             restartBtn: document.getElementById('restart-btn')
         };
 
         document.querySelectorAll('.difficulty-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const difficulty = btn.dataset.difficulty;
-                startQuiz(difficulty);
-            });
+            btn.addEventListener('click', () => startQuiz(btn.dataset.difficulty));
         });
 
         function startQuiz(difficulty) {
             currentDifficulty = difficulty;
-            
             if (difficulty === 'easy') {
                 pokemon = allPokemon.filter(p => p.difficulty === 'easy');
             } else if (difficulty === 'medium') {
@@ -625,9 +731,7 @@
             } else {
                 pokemon = allPokemon;
             }
-            
-            elements.difficultyScreen.classList.add('hidden');
-            elements.quizScreen.classList.remove('hidden');
+            showScreen('quiz');
             initQuiz();
         }
 
@@ -649,16 +753,12 @@
         }
 
         function showQuestion() {
-            if (currentQuestion >= 10) {
-                showFinalScreen();
-                return;
-            }
-
+            if (currentQuestion >= 10) { showFinalScreen(); return; }
             currentPokemon = selectedPokemon[currentQuestion];
             elements.pokemonDisplay.classList.remove('slide-out', 'slide-in');
             void elements.pokemonDisplay.offsetWidth;
             elements.pokemonDisplay.classList.add('slide-in');
-            elements.pokemonDisplay.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${currentPokemon.id}.png`;
+            elements.pokemonDisplay.src = pixelSprite(currentPokemon.id);
             elements.currentQuestionSpan.textContent = currentQuestion + 1;
             elements.input.value = '';
             elements.feedback.textContent = '';
@@ -671,31 +771,19 @@
         function normalizeString(str) {
             return str.toLowerCase()
                 .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[̀-ͯ]/g, "")
                 .replace(/[^a-z0-9\s]/g, "")
                 .trim();
         }
 
         function showSuggestions(value) {
-            if (!value) {
-                elements.suggestions.classList.remove('active');
-                return;
-            }
-
+            if (!value) { elements.suggestions.classList.remove('active'); return; }
             const normalizedValue = normalizeString(value);
-            const matches = pokemon.filter(p => 
-                normalizeString(p.name).includes(normalizedValue)
-            ).slice(0, 5);
-
-            if (matches.length === 0) {
-                elements.suggestions.classList.remove('active');
-                return;
-            }
-
-            elements.suggestions.innerHTML = matches.map((p, index) => 
+            const matches = pokemon.filter(p => normalizeString(p.name).includes(normalizedValue)).slice(0, 5);
+            if (matches.length === 0) { elements.suggestions.classList.remove('active'); return; }
+            elements.suggestions.innerHTML = matches.map((p, index) =>
                 `<div class="suggestion-item" data-pokemon="${p.name}" data-index="${index}">${p.name}</div>`
             ).join('');
-            
             elements.suggestions.classList.add('active');
             selectedSuggestionIndex = -1;
         }
@@ -706,13 +794,10 @@
             selectedSuggestionIndex = -1;
         }
 
-        elements.input.addEventListener('input', (e) => {
-            showSuggestions(e.target.value);
-        });
+        elements.input.addEventListener('input', (e) => showSuggestions(e.target.value));
 
         elements.input.addEventListener('keydown', (e) => {
             const suggestionItems = elements.suggestions.querySelectorAll('.suggestion-item');
-            
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 if (suggestionItems.length > 0) {
@@ -759,13 +844,8 @@
 
         function submitAnswer() {
             const answer = elements.input.value.trim();
-            
-            if (!answer) {
-                return;
-            }
-
+            if (!answer) return;
             const isCorrect = normalizeString(answer) === normalizeString(currentPokemon.name);
-            
             if (isCorrect) {
                 score++;
                 elements.feedback.textContent = '✓ Correct !';
@@ -774,13 +854,10 @@
                 elements.feedback.textContent = `✗ Faux ! C'était ${currentPokemon.name}`;
                 elements.feedback.className = 'feedback incorrect show';
             }
-
             elements.currentScoreSpan.textContent = score;
             elements.submitBtn.disabled = true;
             elements.input.disabled = true;
-
             elements.pokemonDisplay.classList.add('slide-out');
-
             setTimeout(() => {
                 currentQuestion++;
                 elements.submitBtn.disabled = false;
@@ -790,15 +867,288 @@
         }
 
         function showFinalScreen() {
-            elements.quizScreen.classList.add('hidden');
-            elements.finalScreen.classList.remove('hidden');
+            showScreen('final');
             elements.finalScore.textContent = `${score} / 10`;
         }
 
-        elements.restartBtn.addEventListener('click', () => {
-            elements.finalScreen.classList.add('hidden');
-            elements.difficultyScreen.classList.remove('hidden');
-        });
+        elements.restartBtn.addEventListener('click', () => showScreen('difficulty'));
+
+        /* ================================================================
+           TEST DE PERSONNALITÉ
+           Traits : energie, calme, social, independance, intelligence,
+                    creativite, courage, mystere, nature, loyaute
+        ================================================================ */
+        const persoQuestions = [
+            {
+                q: "Qu'est-ce qui te fait vibrer le plus dans la vie ?",
+                type: "text",
+                options: [
+                    { label: "L'aventure, l'adrénaline, repousser mes limites", traits: { energie: 2, courage: 2 } },
+                    { label: "La sérénité, la nature, les instants simples", traits: { nature: 2, calme: 2 } },
+                    { label: "Les gens que j'aime, les rires partagés", traits: { social: 2, loyaute: 2 } },
+                    { label: "Comprendre, créer, imaginer", traits: { intelligence: 2, creativite: 2 } }
+                ]
+            },
+            {
+                q: "Sans réfléchir, lequel t'attire le plus ?",
+                type: "image",
+                options: [
+                    { id: 6, traits: { courage: 2, energie: 1 } },
+                    { id: 94, traits: { mystere: 2, creativite: 1 } },
+                    { id: 133, traits: { social: 2, creativite: 1 } },
+                    { id: 131, traits: { calme: 2, nature: 1 } }
+                ]
+            },
+            {
+                q: "Tes amis te décrivent comme...",
+                type: "text",
+                options: [
+                    { label: "Le roc fiable sur qui on peut toujours compter", traits: { loyaute: 2, calme: 1 } },
+                    { label: "L'étincelle qui met l'ambiance partout", traits: { social: 2, energie: 1 } },
+                    { label: "Le stratège qui a toujours un plan", traits: { intelligence: 2 } },
+                    { label: "L'électron libre, imprévisible et libre", traits: { independance: 2, creativite: 1 } }
+                ]
+            },
+            {
+                q: "Face à un défi qui te dépasse, ta réaction ?",
+                type: "text",
+                options: [
+                    { label: "Je fonce, on verra bien !", traits: { courage: 2, energie: 1 } },
+                    { label: "J'analyse calmement avant d'agir", traits: { intelligence: 2, calme: 1 } },
+                    { label: "J'en parle à mes proches pour avancer ensemble", traits: { social: 1, loyaute: 2 } },
+                    { label: "Je trouve une solution créative et inattendue", traits: { creativite: 2, independance: 1 } }
+                ]
+            },
+            {
+                q: "Lequel choisirais-tu comme partenaire de combat ?",
+                type: "image",
+                options: [
+                    { id: 68, traits: { courage: 2, loyaute: 1 } },
+                    { id: 65, traits: { intelligence: 2, mystere: 1 } },
+                    { id: 59, traits: { loyaute: 2, energie: 1 } },
+                    { id: 123, traits: { independance: 2, courage: 1 } }
+                ]
+            },
+            {
+                q: "Ton week-end parfait ressemble à...",
+                type: "text",
+                options: [
+                    { label: "Une rando ou un coin de nature au calme", traits: { nature: 2, calme: 1 } },
+                    { label: "Une grosse fête avec plein de monde", traits: { social: 2, energie: 1 } },
+                    { label: "Seul(e) avec un bon livre ou un bon jeu", traits: { independance: 2, intelligence: 1 } },
+                    { label: "Un projet créatif perso qui me passionne", traits: { creativite: 2, independance: 1 } }
+                ]
+            },
+            {
+                q: "Quelle est ta plus grande force ?",
+                type: "text",
+                options: [
+                    { label: "Ma détermination sans faille", traits: { courage: 2, energie: 1 } },
+                    { label: "Mon calme en toute situation", traits: { calme: 2, mystere: 1 } },
+                    { label: "Ma loyauté envers les miens", traits: { loyaute: 2, social: 1 } },
+                    { label: "Mon imagination débordante", traits: { creativite: 2, intelligence: 1 } }
+                ]
+            },
+            {
+                q: "Lequel adopterais-tu sans hésiter ?",
+                type: "image",
+                options: [
+                    { id: 25, traits: { social: 2, energie: 1 } },
+                    { id: 39, traits: { social: 1, creativite: 2 } },
+                    { id: 143, traits: { calme: 2, independance: 1 } },
+                    { id: 54, traits: { creativite: 1, independance: 1, calme: 1 } }
+                ]
+            },
+            {
+                q: "Au fond, comment vois-tu le monde ?",
+                type: "text",
+                options: [
+                    { label: "Plein d'aventures à vivre", traits: { energie: 2, courage: 1 } },
+                    { label: "Un mystère fascinant à explorer", traits: { mystere: 2, intelligence: 1 } },
+                    { label: "Un endroit précieux à protéger et chérir", traits: { nature: 2, loyaute: 1 } },
+                    { label: "Une page blanche à réinventer", traits: { creativite: 2, independance: 1 } }
+                ]
+            },
+            {
+                q: "Tout au fond de toi, tu rêves de...",
+                type: "text",
+                options: [
+                    { label: "Devenir le/la meilleur(e) et marquer les esprits", traits: { courage: 2, energie: 1, independance: 1 } },
+                    { label: "Trouver une vraie paix intérieure", traits: { calme: 2, nature: 1 } },
+                    { label: "Être entouré(e) d'amour et d'amitié", traits: { social: 2, loyaute: 2 } },
+                    { label: "Percer les grands secrets de l'univers", traits: { mystere: 2, intelligence: 2 } }
+                ]
+            }
+        ];
+
+        const totems = [
+            { id: 25, name: "Pikachu", title: "L'âme électrique", traits: { social: 3, energie: 3, loyaute: 2 },
+              desc: "Tu es une boule d'énergie irrésistible. Là où tu passes, l'ambiance suit, et les gens se sentent bien autour de toi. Fidèle et attachant, tu donnes de l'éclat au quotidien des autres sans même t'en rendre compte." },
+            { id: 6, name: "Dracaufeu", title: "Le feu qui ose", traits: { courage: 3, energie: 3, independance: 1 },
+              desc: "Ambitieux et flamboyant, tu n'as pas peur de viser haut. Tu déploies tes ailes quand les autres hésitent encore. Ta fougue impressionne, et ta confiance entraîne ceux qui t'entourent vers le sommet." },
+            { id: 1, name: "Bulbizarre", title: "La force tranquille", traits: { nature: 3, calme: 2, loyaute: 2 },
+              desc: "Doux, posé et profondément ancré, tu avances à ton rythme sans jamais perdre le nord. On se sent en sécurité avec toi. Tu grandis lentement mais sûrement, fidèle à tes racines et à ceux que tu aimes." },
+            { id: 7, name: "Carapuce", title: "Le cool malicieux", traits: { social: 2, calme: 2, creativite: 2, courage: 1 },
+              desc: "Décontracté en apparence, plein de surprises au fond. Tu gardes ton sang-froid dans la tempête tout en gardant ton humour. Sous ta carapace se cache une vraie créativité et un cœur fidèle." },
+            { id: 133, name: "Évoli", title: "Le cœur aux mille possibles", traits: { social: 2, creativite: 3, loyaute: 2 },
+              desc: "Tu es pure potentialité : adaptable, curieux, capable de te réinventer selon les chemins que tu choisis. Attachant et ouvert, tu inspires l'affection. Ton avenir n'est pas écrit, et c'est exactement ce qui te rend unique." },
+            { id: 143, name: "Ronflex", title: "Le zen absolu", traits: { calme: 3, independance: 3 },
+              desc: "Rien ne t'ébranle. Tu connais la valeur du repos, du plaisir simple et du lâcher-prise. Indépendant et imperturbable, tu vis selon tes propres règles — et quand tu te mobilises vraiment, on remarque ta force tranquille." },
+            { id: 150, name: "Mewtwo", title: "L'esprit insondable", traits: { intelligence: 3, mystere: 3, independance: 2 },
+              desc: "Brillant, intense et profondément indépendant, tu vois plus loin que les autres. Tu questionnes tout, tu cherches ta propre vérité. Ton mystère intrigue, et ta puissance intérieure force le respect." },
+            { id: 151, name: "Mew", title: "L'esprit libre et joueur", traits: { creativite: 3, mystere: 2, nature: 2, social: 1 },
+              desc: "Insaisissable et plein de magie, tu mêles curiosité enfantine et profondeur insoupçonnée. Tu touches à tout, tu rêves grand, tu vois la beauté partout. Rare et précieux, tu portes en toi un peu de tous les possibles." },
+            { id: 94, name: "Ectoplasma", title: "L'espiègle de l'ombre", traits: { mystere: 3, creativite: 2, social: 1 },
+              desc: "Malicieux, imprévisible et terriblement charismatique, tu adores surprendre. Derrière ton humour taquin se cache un esprit vif et une vraie profondeur. Tu brilles dans l'ombre et tu aimes garder une part de mystère." },
+            { id: 130, name: "Léviator", title: "La tempête qui gronde", traits: { courage: 3, energie: 2, independance: 2 },
+              desc: "On t'a peut-être sous-estimé, mais tu as forgé ta force dans l'épreuve. Aujourd'hui, ta détermination est une déferlante. Indépendant et puissant, tu ne plies devant personne quand il s'agit de défendre ce qui compte." },
+            { id: 65, name: "Alakazam", title: "Le génie stratège", traits: { intelligence: 3, mystere: 2, calme: 1 },
+              desc: "Ton esprit est ta plus grande arme. Tu analyses, anticipes, comprends ce qui échappe aux autres. Calme et cérébral, tu résous les problèmes avec une longueur d'avance. Le savoir est ton terrain de jeu." },
+            { id: 68, name: "Mackogneur", title: "Le pilier loyal", traits: { courage: 3, loyaute: 2, energie: 1 },
+              desc: "Solide comme le roc, tu protèges les tiens avec une force et une fidélité sans faille. Tu n'as pas peur de l'effort ni des coups durs. Quand on a besoin d'un appui, c'est vers toi qu'on se tourne." },
+            { id: 39, name: "Rondoudou", title: "L'artiste sensible", traits: { social: 3, creativite: 2, calme: 1 },
+              desc: "Doux, expressif et attachant, tu touches les gens en plein cœur. Tu as ce don de capter l'attention et d'apaiser les autres. Sensible et créatif, tu transformes tes émotions en quelque chose de beau." },
+            { id: 54, name: "Psykokwak", title: "Le génie qui s'ignore", traits: { creativite: 2, independance: 2, calme: 1, intelligence: 1 },
+              desc: "En apparence à côté de la plaque, mais en réalité plein de ressources cachées. Quand la pression monte, tu révèles un potentiel insoupçonné. Authentique et attachant, tu n'as pas besoin de frimer pour être génial." },
+            { id: 95, name: "Onix", title: "Le roc indomptable", traits: { independance: 3, calme: 2, courage: 1 },
+              desc: "Imposant et inébranlable, tu traces ta route avec une volonté de fer. Tu n'as besoin de personne pour tenir debout, mais ta présence rassure. Patient et solide, rien ne t'érode vraiment." },
+            { id: 131, name: "Lokhlass", title: "L'âme bienveillante", traits: { calme: 3, nature: 2, loyaute: 2 },
+              desc: "Doux géant au cœur immense, tu accompagnes les autres avec une tendresse rare. Apaisant et fidèle, tu portes ceux qui sont perdus jusqu'à l'autre rive. Ta bonté est ta plus grande force." },
+            { id: 4, name: "Salamèche", title: "La flamme naissante", traits: { energie: 2, courage: 2, social: 1 },
+              desc: "Plein de fougue et d'envie, tu portes en toi une flamme qui ne demande qu'à grandir. Courageux et déterminé, tu avances avec passion. Ton enthousiasme est contagieux, et ton potentiel ne fait que commencer." },
+            { id: 38, name: "Feunard", title: "L'élégance mystérieuse", traits: { mystere: 3, intelligence: 2, independance: 1 },
+              desc: "Raffiné, fascinant et un brin insaisissable, tu dégages une aura à part. Intelligent et indépendant, tu choisis avec soin qui mérite ta confiance. Derrière ta grâce se cache une profondeur que peu soupçonnent." },
+            { id: 9, name: "Tortank", title: "Le protecteur", traits: { calme: 2, loyaute: 3, courage: 2 },
+              desc: "Solide et rassurant, tu es le bouclier de ceux que tu aimes. Tu gardes ton calme sous le feu et tu frappes fort quand il le faut. Loyal jusqu'au bout, tu inspires une confiance totale." },
+            { id: 3, name: "Florizarre", title: "Le sage de la nature", traits: { nature: 3, calme: 3 },
+              desc: "Serein, équilibré et profondément connecté à l'essentiel, tu rayonnes d'une sagesse paisible. Tu offres ta force aux autres sans bruit. Ancré et généreux, tu es un refuge de calme dans un monde agité." },
+            { id: 59, name: "Arcanin", title: "Le noble fidèle", traits: { loyaute: 3, courage: 2, energie: 2 },
+              desc: "Loyal, courageux et plein de panache, tu inspires l'admiration et la confiance. Tu cours vers le danger pour protéger les tiens. Noble dans l'âme, tu allies force, fidélité et un cœur ardent." },
+            { id: 123, name: "Insécateur", title: "Le solitaire affûté", traits: { courage: 3, independance: 3, energie: 1 },
+              desc: "Rapide, précis et indépendant, tu trances dans le vif sans détour. Tu préfères agir que parler, et ton efficacité impressionne. Discipliné et déterminé, tu suis ta propre voie avec une intensité tranchante." },
+            { id: 132, name: "Métamorph", title: "Le caméléon créatif", traits: { creativite: 3, social: 2, independance: 1 },
+              desc: "Adaptable à l'infini, tu te fonds dans tous les univers et tu te réinventes sans cesse. Curieux et ingénieux, tu surprends par ta capacité à devenir ce que la situation demande. Ta plus grande force, c'est ta polyvalence." },
+            { id: 146, name: "Sulfura", title: "Le brasier légendaire", traits: { energie: 3, courage: 3, mystere: 1 },
+              desc: "Une passion ardente t'anime, un feu qui ne s'éteint jamais. Audacieux et flamboyant, tu vis chaque instant avec intensité. Rare et magnétique, tu illumines tout sur ton passage et tu n'as peur d'aucune épreuve." },
+            { id: 144, name: "Artikodin", title: "La grâce glacée", traits: { calme: 3, mystere: 2, independance: 1 },
+              desc: "Posé, élégant et insaisissable, tu dégages une sérénité presque irréelle. Tu gardes la tête froide quand tout s'emballe. Indépendant et profond, ta tranquillité cache une majesté que peu osent approcher." }
+        ];
+
+        const traitLabels = {
+            energie: "Énergie", calme: "Sérénité", social: "Sociabilité",
+            independance: "Indépendance", intelligence: "Intelligence", creativite: "Créativité",
+            courage: "Courage", mystere: "Mystère", nature: "Nature", loyaute: "Loyauté"
+        };
+
+        let persoIndex = 0;
+        let persoScores = {};
+
+        const persoEls = {
+            bar: document.getElementById('perso-bar'),
+            current: document.getElementById('perso-current'),
+            question: document.getElementById('perso-question'),
+            answers: document.getElementById('perso-answers')
+        };
+
+        function startPersoTest() {
+            persoIndex = 0;
+            persoScores = {};
+            Object.keys(traitLabels).forEach(t => persoScores[t] = 0);
+            showScreen('perso');
+            renderPersoQuestion();
+        }
+
+        function renderPersoQuestion() {
+            const data = persoQuestions[persoIndex];
+            persoEls.current.textContent = persoIndex + 1;
+            persoEls.bar.style.width = `${(persoIndex / persoQuestions.length) * 100}%`;
+            persoEls.question.textContent = data.q;
+            persoEls.answers.innerHTML = '';
+
+            if (data.type === 'text') {
+                const wrap = document.createElement('div');
+                wrap.className = 'perso-options';
+                data.options.forEach((opt, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'perso-option';
+                    btn.textContent = opt.label;
+                    btn.addEventListener('click', () => choosePersoOption(opt, btn));
+                    wrap.appendChild(btn);
+                });
+                persoEls.answers.appendChild(wrap);
+            } else {
+                const grid = document.createElement('div');
+                grid.className = 'perso-image-grid';
+                data.options.forEach((opt) => {
+                    const card = document.createElement('div');
+                    card.className = 'perso-image-option';
+                    const img = document.createElement('img');
+                    img.src = officialArt(opt.id);
+                    img.alt = "Pokémon";
+                    img.loading = "lazy";
+                    card.appendChild(img);
+                    card.addEventListener('click', () => choosePersoOption(opt, card));
+                    grid.appendChild(card);
+                });
+                persoEls.answers.appendChild(grid);
+            }
+        }
+
+        let persoLocked = false;
+        function choosePersoOption(opt, el) {
+            if (persoLocked) return;
+            persoLocked = true;
+            el.classList.add('selected');
+            Object.entries(opt.traits).forEach(([t, v]) => { persoScores[t] = (persoScores[t] || 0) + v; });
+            persoEls.bar.style.width = `${((persoIndex + 1) / persoQuestions.length) * 100}%`;
+            setTimeout(() => {
+                persoLocked = false;
+                persoIndex++;
+                if (persoIndex >= persoQuestions.length) {
+                    showPersoResult();
+                } else {
+                    renderPersoQuestion();
+                }
+            }, 420);
+        }
+
+        function showPersoResult() {
+            // Meilleur match par produit scalaire entre les scores utilisateur et le profil de chaque totem
+            let best = null;
+            let bestScore = -1;
+            const ranked = totems.map(t => {
+                let dot = 0;
+                Object.entries(t.traits).forEach(([trait, weight]) => {
+                    dot += (persoScores[trait] || 0) * weight;
+                });
+                return { totem: t, dot };
+            });
+            // tri décroissant + petite préférence aléatoire en cas d'égalité parfaite
+            ranked.sort((a, b) => b.dot - a.dot);
+            const top = ranked.filter(r => r.dot === ranked[0].dot);
+            best = top[Math.floor(Math.random() * top.length)].totem;
+
+            // Top 3 traits de l'utilisateur pour les badges
+            const userTopTraits = Object.entries(persoScores)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3)
+                .filter(([, v]) => v > 0)
+                .map(([t]) => traitLabels[t]);
+
+            document.getElementById('totem-name').textContent = best.name;
+            document.getElementById('totem-title').textContent = best.title;
+            document.getElementById('totem-img').src = officialArt(best.id);
+            document.getElementById('totem-desc').textContent = best.desc;
+            const traitsWrap = document.getElementById('totem-traits');
+            traitsWrap.innerHTML = userTopTraits
+                .map(label => `<span class="totem-trait">${label}</span>`)
+                .join('');
+
+            showScreen('persoResult');
+        }
+
+        document.getElementById('perso-restart').addEventListener('click', startPersoTest);
+        document.getElementById('perso-try-quiz').addEventListener('click', () => showScreen('difficulty'));
     </script>
 </body>
 </html>
