@@ -285,6 +285,15 @@
             font-size: 0.9em;
             margin-bottom: 18px;
         }
+        .perso-hint { color: #a18cd1; font-style: italic; }
+        #perso-next {
+            background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+            color: #3a2350;
+            font-weight: 700;
+            margin-top: 20px;
+        }
+        #perso-next:hover { filter: brightness(0.97); }
+        #perso-next:disabled { background: #e6e6ee; color: #aaa; filter: none; }
         .perso-question {
             text-align: center;
             color: #333;
@@ -489,9 +498,10 @@
         <div id="perso-screen" class="hidden">
             <h1>🔮 Quel est ton Pokémon totem ?</h1>
             <div class="perso-progress"><div class="perso-progress-bar" id="perso-bar"></div></div>
-            <div class="perso-counter">Question <span id="perso-current">1</span> / 10</div>
+            <div class="perso-counter">Question <span id="perso-current">1</span> / 10 · <span class="perso-hint">plusieurs réponses possibles</span></div>
             <div class="perso-question" id="perso-question"></div>
             <div id="perso-answers"></div>
+            <button id="perso-next" disabled>Suivant</button>
         </div>
 
         <!-- ============ PERSO : résultat ============ -->
@@ -1049,6 +1059,8 @@
             question: document.getElementById('perso-question'),
             answers: document.getElementById('perso-answers')
         };
+        const persoNext = document.getElementById('perso-next');
+        persoNext.addEventListener('click', validatePersoQuestion);
 
         function startPersoTest() {
             persoIndex = 0;
@@ -1058,12 +1070,18 @@
             renderPersoQuestion();
         }
 
+        // Options cochées pour la question en cours (Set d'index)
+        let persoSelected = new Set();
+
         function renderPersoQuestion() {
             const data = persoQuestions[persoIndex];
+            persoSelected = new Set();
             persoEls.current.textContent = persoIndex + 1;
             persoEls.bar.style.width = `${(persoIndex / persoQuestions.length) * 100}%`;
             persoEls.question.textContent = data.q;
             persoEls.answers.innerHTML = '';
+            persoNext.textContent = persoIndex === persoQuestions.length - 1 ? "Voir mon totem" : "Suivant";
+            persoNext.disabled = true;
 
             if (data.type === 'text') {
                 const wrap = document.createElement('div');
@@ -1072,14 +1090,14 @@
                     const btn = document.createElement('button');
                     btn.className = 'perso-option';
                     btn.textContent = opt.label;
-                    btn.addEventListener('click', () => choosePersoOption(opt, btn));
+                    btn.addEventListener('click', () => togglePersoOption(i, btn));
                     wrap.appendChild(btn);
                 });
                 persoEls.answers.appendChild(wrap);
             } else {
                 const grid = document.createElement('div');
                 grid.className = 'perso-image-grid';
-                data.options.forEach((opt) => {
+                data.options.forEach((opt, i) => {
                     const card = document.createElement('div');
                     card.className = 'perso-image-option';
                     const img = document.createElement('img');
@@ -1087,29 +1105,39 @@
                     img.alt = "Pokémon";
                     img.loading = "lazy";
                     card.appendChild(img);
-                    card.addEventListener('click', () => choosePersoOption(opt, card));
+                    card.addEventListener('click', () => togglePersoOption(i, card));
                     grid.appendChild(card);
                 });
                 persoEls.answers.appendChild(grid);
             }
         }
 
-        let persoLocked = false;
-        function choosePersoOption(opt, el) {
-            if (persoLocked) return;
-            persoLocked = true;
-            el.classList.add('selected');
-            Object.entries(opt.traits).forEach(([t, v]) => { persoScores[t] = (persoScores[t] || 0) + v; });
+        function togglePersoOption(i, el) {
+            if (persoSelected.has(i)) {
+                persoSelected.delete(i);
+                el.classList.remove('selected');
+            } else {
+                persoSelected.add(i);
+                el.classList.add('selected');
+            }
+            persoNext.disabled = persoSelected.size === 0;
+        }
+
+        function validatePersoQuestion() {
+            if (persoSelected.size === 0) return;
+            const data = persoQuestions[persoIndex];
+            persoSelected.forEach(i => {
+                Object.entries(data.options[i].traits).forEach(([t, v]) => {
+                    persoScores[t] = (persoScores[t] || 0) + v;
+                });
+            });
             persoEls.bar.style.width = `${((persoIndex + 1) / persoQuestions.length) * 100}%`;
-            setTimeout(() => {
-                persoLocked = false;
-                persoIndex++;
-                if (persoIndex >= persoQuestions.length) {
-                    showPersoResult();
-                } else {
-                    renderPersoQuestion();
-                }
-            }, 420);
+            persoIndex++;
+            if (persoIndex >= persoQuestions.length) {
+                showPersoResult();
+            } else {
+                renderPersoQuestion();
+            }
         }
 
         function showPersoResult() {
